@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moio.mapper.CategoryMapper">
+    
+    <resultMap id="categoryResultMap" type="com.moio.entity.Category">
+        <id property="id" column="id"/>
+        <result property="content" column="content"/>
+        <result property="indexC" column="index_c"/>
+        <collection property="basicSqlList" javaType="ArrayList"
+                    column="index_c" ofType="com.moio.entity.BasicSql"
+                    select="com.moio.mapper.BasicSqlMapper.getBasicSqlByCategoryIndex"
+                    fetchType="lazy">
+            <id property="id" column="id"/>
+            <result property="sqlKey" column="sql_key"/>
+            <result property="sqlValue" column="sql_value"/>
+        </collection>
+
+    </resultMap>
+    
+    <!--    查询全部-->
+    <select id="list" resultType="com.moio.entity.Category">
+        SELECT *
+        from t_category
+        order by index_c
+    </select>
+
+    <select id="getCategoryByContent" parameterType="string" resultType="com.moio.entity.Category">
+        select *
+        from t_category
+        where content = #{content} limit 1
+    </select>
+
+    <!--    通过id查询,普通的查询的时候知道是一条数据的时候 在后面加入 limit 1 sql执行速度更快-->
+    <select id="getCategoryByIndex" parameterType="integer" resultMap="categoryResultMap">
+        select *
+        from t_category
+        where index_c = #{indexC} limit 1
+    </select>
+    <!--    分页查询加模糊查询-->
+    <select id="pages" parameterType="map" resultType="com.moio.entity.Category">
+        select *
+        from t_category
+        where content like concat('%', #{search}, '%') limit #{index}
+        , #{size}
+    </select>
+    <!--    插入数据-->
+    <insert id="addCategory" parameterType="com.moio.entity.Category">
+        insert into t_category (id, content, index_c)
+        values (#{id}, #{content}, #{indexC})
+    </insert>
+    <!--    更新数据-->
+    <update id="updateCategory" parameterType="com.moio.entity.Category">
+        update t_category
+        set content = #{content},
+        index_c=#{indexC}
+        where id = #{id}
+    </update>
+    <!--    通过id删除数据-->
+    <delete id="deleteCategory" parameterType="integer">
+        delete
+        from t_category
+        where id = #{id}
+    </delete>
+
+</mapper>

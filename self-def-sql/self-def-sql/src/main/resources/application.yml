@@ -1,0 +1,22 @@
+server:
+  port: 8100
+spring:
+  #h2
+  h2:
+    console:
+      path: /h2-console
+      enabled: true
+  datasource:
+    sql-script-encoding: utf-8
+    driver-class-name: org.h2.Driver
+    schema: file:C:/h2data/schema-h2.sql
+    data: file:C:/h2data/data-h2.sql
+    url: jdbc:h2:mem:test
+    username: root
+    password: test
+mybatis:
+  configuration:
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    map-underscore-to-camel-case: true
+  #  mapper.xml
+  mapper-locations: classpath:mapper/*.xml

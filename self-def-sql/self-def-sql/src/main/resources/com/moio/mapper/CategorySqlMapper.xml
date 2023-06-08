@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moio.mapper.CategorySqlMapper">
+    <!--    查询全部-->
+    <select id="list" resultType="com.moio.entity.CategorySql">
+        SELECT *
+        from t_category_sql
+    </select>
+
+    <!--    插入数据-->
+    <insert id="addCategorySql" parameterType="com.moio.entity.CategorySql">
+        insert into t_category_sql (cid, sid, seq)
+        values (#{cid}, #{sid}, #{seq})
+    </insert>
+
+    <delete id="deleteCategorySql">
+        delete
+        from t_category_sql
+        where cid = #{cid} and sid in
+        <foreach collection="sidList" item="sid" open="(" close=")" separator=",">
+            #{sid}
+        </foreach>
+    </delete>
+
+    <select id="getMaxSeq" resultType="integer">
+        select max(seq)
+        from t_category_sql
+        where cid = #{cid} and sid in
+        <foreach collection="sidList" item="sid" open="(" close=")" separator=",">
+            #{sid}
+        </foreach>
+    </select>
+
+    <select id="getSeq" resultType="integer">
+        select seq
+        from t_category_sql
+        where cid = #{cid} and sid = #{sid}
+    </select>
+
+    <update id="updateCategorySql" parameterType="com.moio.entity.CategorySql">
+        update t_category_sql set seq = #{seq} where cid = #{cid} and sid = #{sid}
+    </update>
+</mapper>

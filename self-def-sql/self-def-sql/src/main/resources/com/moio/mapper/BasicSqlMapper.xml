@@ -1,0 +1,64 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.moio.mapper.BasicSqlMapper">
+    <!--    查询全部-->
+    <select id="list" resultType="com.moio.entity.BasicSql">
+        SELECT *
+        from t_basic_sql
+        order by id
+    </select>
+
+    <select id="getBasicSqlByCategoryIndex" parameterType="integer" resultType="com.moio.entity.BasicSql">
+        select *
+        from t_basic_sql
+        where id in (
+            select sid from t_category_sql
+            where cid = (
+                select id from t_category
+                where index_c = #{indexC}
+            )
+            order by seq
+        )
+    </select>
+
+    <!--    通过id查询,普通的查询的时候知道是一条数据的时候 在后面加入 limit 1 sql执行速度更快-->
+    <select id="getBasicSqlById" parameterType="integer" resultType="com.moio.entity.BasicSql">
+        select *
+        from t_basic_sql
+        where id = #{id} limit 1
+    </select>
+
+    <select id="getBasicSqlByValueAndKey" parameterType="com.moio.entity.BasicSql" resultType="com.moio.entity.BasicSql">
+        select *
+        from t_basic_sql
+        where sql_key = #{sqlKey} and sql_value = #{sqlValue} limit 1
+    </select>
+    <!--    分页查询加模糊查询-->
+    <select id="pages" parameterType="map" resultType="com.moio.entity.BasicSql">
+        select *
+        from t_basic_sql
+        where sql_value like concat('%', #{search}, '%') limit #{index}
+        , #{size}
+    </select>
+    <!--    插入数据-->
+    <insert id="addBasicSql" parameterType="com.moio.entity.BasicSql">
+        insert into t_basic_sql (sql_key, sql_value)
+        values (#{sqlKey}, #{sqlValue})
+    </insert>
+    <!--    更新数据-->
+    <update id="updateBasicSql" parameterType="com.moio.entity.BasicSql">
+        update t_basic_sql
+        set sql_key = #{sqlKey},
+        sql_value=#{sqlValue}
+        where id = #{id}
+    </update>
+    <!--    通过id删除数据-->
+    <delete id="deleteBasicSql" parameterType="integer">
+        delete
+        from t_basic_sql
+        where id = #{id}
+    </delete>
+
+</mapper>
