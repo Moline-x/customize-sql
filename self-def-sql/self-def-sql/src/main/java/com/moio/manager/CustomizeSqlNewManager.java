@@ -257,10 +257,10 @@ public class CustomizeSqlNewManager {
                 .filter(basicSql -> !idList.contains(basicSql.getId()))
                 .filter(basicSql -> checkSqlKeyword(basicSql, searchText, searchKey))
                 .collect(Collectors.toList());
-        SystemWarnLanguageEnum.LIST_ADDABLE_SQL.output();
+        log.debug(SystemWarnLanguageEnum.LIST_ADDABLE_SQL.getContent());
         sqlList.forEach(s -> log.debug("{}. {}", s.getId(), s.getSqlValue()));
         resultDto.setData(sqlList);
-        SystemWarnLanguageEnum.INPUT_SQL_INDEX.output();
+        log.debug(SystemWarnLanguageEnum.INPUT_SQL_INDEX.getContent());
         if (!"".equals(sqlIndex) && sqlIndex != null) {
             try {
                 int num;

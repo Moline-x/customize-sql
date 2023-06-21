@@ -1,9 +1,29 @@
-DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS t_category_sql;
+DROP TABLE IF EXISTS t_category;
+DROP TABLE IF EXISTS t_basic_sql;
 
-CREATE TABLE user
+CREATE TABLE t_category
 (
-    id    INT(20) NOT NULL COMMENT '主键ID',
-    name  VARCHAR(30) NULL DEFAULT NULL COMMENT '姓名',
-    age   INT(11) NULL DEFAULT NULL COMMENT '年龄',
+    id       INT(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    content  VARCHAR(255) NULL DEFAULT NULL COMMENT '分类名',
+    index_c    INT(20) NULL DEFAULT NULL UNIQUE COMMENT '索引',
     PRIMARY KEY (id)
+);
+
+CREATE TABLE t_basic_sql
+(
+    id       INT(20) NOT NULL AUTO_INCREMENT COMMENT '主键ID',
+    sql_key      VARCHAR(255) NULL DEFAULT NULL COMMENT 'sql key',
+    sql_value    VARCHAR(1020) NULL DEFAULT NULL COMMENT 'sql value',
+    PRIMARY KEY (id)
+);
+
+CREATE TABLE t_category_sql
+(
+    cid  INT(20) NULL DEFAULT NULL COMMENT '分类ID',
+    sid  INT(20) NULL DEFAULT NULL COMMENT 'sqlID',
+    seq  INT(20) DEFAULT 0,
+    PRIMARY KEY (cid,sid),
+    FOREIGN KEY (cid) REFERENCES t_category (id) ON UPDATE CASCADE ON DELETE CASCADE,
+    FOREIGN KEY (sid) REFERENCES t_basic_sql (id) ON UPDATE CASCADE ON DELETE CASCADE
 );
