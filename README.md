@@ -19,7 +19,7 @@ customize sql system 是一款免登录的用户定制化case存储器 ，用户
 
 ## 安装与使用
 
-> 下载GUI.zip并解压
+> [下载GUI.zip](https://github.com/Moline-x/customize-sql/releases)并解压
 >
 > 将h2data文件夹全部移动到C盘根目录
 >
