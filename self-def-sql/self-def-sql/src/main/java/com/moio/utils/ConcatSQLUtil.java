@@ -5,6 +5,7 @@ import com.moio.entity.BasicSql;
 import com.moio.entity.Category;
 import com.moio.entity.CategorySql;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -61,23 +62,148 @@ public final class ConcatSQLUtil {
      * @return concat sql
      */
     public static String concatSQLwithMultipleParameters(String sql, List<String> values) {
-        int prefixIndex = sql.lastIndexOf("(") + 1;
-        int suffixIndex = sql.lastIndexOf(")");
-        String middleStr = "','";
-        String prefixSQL = sql.substring(0, prefixIndex + 1);
-        String suffixSQL = sql.substring(suffixIndex);
+        // init result
+        String result = "";
 
-        StringBuilder middleSQL = new StringBuilder();
-        for (int i = 0; i < values.size(); i++) {
-            String value = values.get(i);
-            if (i == values.size() - 1) {
-                middleSQL.append(value).append("'");
-                break;
+        if (containsTarget(values, "[")) {
+            result = concatSQLwithGroupData(sql, values);
+        } else {
+            int prefixIndex = sql.lastIndexOf("(") + 1;
+            int suffixIndex = sql.lastIndexOf(")");
+            String middleStr = "','";
+            String prefixSQL = sql.substring(0, prefixIndex + 1);
+            String suffixSQL = sql.substring(suffixIndex);
+
+            StringBuilder middleSQL = new StringBuilder();
+            for (int i = 0; i < values.size(); i++) {
+                String value = values.get(i);
+                if (i == values.size() - 1) {
+                    middleSQL.append(value).append("'");
+                    break;
+                }
+                middleSQL.append(value).append(middleStr);
             }
-            middleSQL.append(value).append(middleStr);
+            result = prefixSQL + middleSQL +suffixSQL;
         }
 
-        return prefixSQL + middleSQL +suffixSQL;
+        return result;
+    }
+
+    /**
+     * check if list contained target string.
+     *
+     * @param source    source list
+     * @param target    target string
+     * @return true - contain, false - un-contain
+     */
+    public static boolean containsTarget(List<String> source, String target) {
+
+        for (String str : source) {
+            if (str.contains(target)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
+     * concat sql with group data.
+     *
+     * @param sql       sql
+     * @param values    values
+     * @return concat sql
+     */
+    public static String concatSQLwithGroupData(String sql, List<String> values) {
+
+        // get index list
+        List<Integer> preIndexList = computeIndex(sql, '(', 1);
+        List<Integer> sufIndexList = computeIndex(sql, ')', 0);
+
+        // convert to same group
+        List<List<String>> sameGroup = convertListToSameGroup(values);
+        int count = sameGroup.get(0).size();
+
+        // 2 () = 1 segment
+        String prefixSQL = sql.substring(0, preIndexList.get(0) + 1);
+        String suffixSQL = sql.substring(sufIndexList.get(sufIndexList.size() - 1));
+        String middleStr = "','";
+
+        StringBuilder result = new StringBuilder(prefixSQL);
+
+        for (int i = 0; i < sameGroup.size(); i++) {
+            List<String> list = sameGroup.get(i);
+            for (int j = 0; j < count; j++) {
+                String value = list.get(j);
+                if (j == count - 1) {
+                    result.append(value).append("'");
+                    break;
+                }
+                result.append(value).append(middleStr);
+            }
+            if (i != sameGroup.size() - 1) {
+                prefixSQL = sql.substring(sufIndexList.get(i), preIndexList.get(i+1) + 1);
+                result.append(prefixSQL);
+            }
+        }
+
+        result.append(suffixSQL);
+
+        return result.toString();
+    }
+
+    /**
+     * convert list to same group.
+     *
+     * @param values value list
+     * @return same group list
+     */
+    public static List<List<String>> convertListToSameGroup(List<String> values) {
+
+        List<List<String>> result = new ArrayList<>();
+
+        String valueStr = ConvertUtil.convertListToString(values);
+        String[] split = valueStr.contains("],") ? valueStr.split("],") : valueStr.split("]");
+        int col = split[0].split(",").length;
+        String[][] resultMap = new String[split.length][col];
+        for (int j = 0; j < split.length; j++) {
+            String s = split[j];
+            String s1 = s.replaceAll("\\[", "");
+            String s2 = s1.replaceAll("]", "");
+            String[] innerSplit = s2.split(",");
+            System.arraycopy(innerSplit, 0, resultMap[j], 0, innerSplit.length);
+        }
+        for (int i = 0; i < col; i++) {
+            List<String> list = new ArrayList<>();
+            for (int j = 0; j < split.length; j++) {
+                list.add(resultMap[j][i]);
+            }
+            result.add(list);
+        }
+
+
+        return result;
+    }
+
+    /**
+     * compute index for target in source.
+     *
+     * @param source    source string
+     * @param target    target character
+     * @param offset    move distance
+     * @return index list
+     */
+    public static List<Integer> computeIndex(String source, char target, int offset) {
+
+        List<Integer> list = new ArrayList<>();
+
+        char[] chars = source.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            if (chars[i] == target) {
+                list.add(i + offset);
+            }
+        }
+
+        return list;
     }
 
     /**

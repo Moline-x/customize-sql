@@ -113,7 +113,8 @@ public class ShowViewPanel extends JPanel {
                         // get name field value
                         submitBtn.addActionListener(l -> {
                             String value = nameField.getText();
-                            if ("".equals(map.get(submitBtn.getName())) || map.get(submitBtn.getName()) == null) {
+
+                            if (map.get(submitBtn.getName()) == null) {
                                 map.put(submitBtn.getName(), value);
                                 String sqls = manager.keyListView(key, value, basicSqls);
                                 resultArr[Integer.parseInt(submitBtn.getName())] = sqls;
