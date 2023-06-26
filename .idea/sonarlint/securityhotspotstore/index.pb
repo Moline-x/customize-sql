@@ -77,8 +77,6 @@ Eself-def-sql/self-def-sql/src/main/java/com/moio/utils/ValidUtil.java,7\9\7918
 Nself-def-sql/self-def-sql/src/main/java/com/moio/entity/sta/BasicGateLane.java,8\d\8d587a347fab62c99023664542c40b77175a871e
 7
 LICENSE,0\3\0398ccd0f49298b10a3d76a47800d2ebecd49859
-9
-	README.md,8\e\8ec9a00bfd09b3190ac6b22251dbb1aa95a0579d
 Q
 !self-def-sql/self-def-sql/pom.xml,3\4\34531855fc1406e9d23100130c94daa12530a7b6
 {
