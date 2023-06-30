@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 /**
@@ -70,6 +72,22 @@ public class ShowAllSQLPanel extends JPanel {
                 jTextArea.append("\n");
             });
             SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+        });
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    jTextArea.setText(null);
+                    String text = searchField.getText();
+                    List<BasicSql> sqlList = manager.subShowBasicSQLViewWithSearch(text);
+                    sqlList.forEach(s -> {
+                        jTextArea.append(s.getId() + ". " + s.getSqlValue());
+                        jTextArea.append("\n");
+                    });
+                    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+                }
+            }
         });
 
         add(viewLabel);

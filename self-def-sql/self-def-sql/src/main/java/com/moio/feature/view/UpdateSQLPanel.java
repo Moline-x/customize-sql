@@ -10,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 
@@ -87,23 +89,24 @@ public class UpdateSQLPanel extends JPanel {
             }
         });
 
-        submitBtn.addActionListener(l -> {
-            String text = objectJList.getSelectedValue().split("\\.")[0];
-            String key = keyField.getText();
-            String sql = sqlField.getText();
-            // execute update
-            ResultDto<BasicSql> resultDto = manager.initUpdateBasicSQLView(text, key, sql);
-            if (resultDto.isUpdateResult()) {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
-                log.info(resultDto.getMessage());
-                // clear panel and reset value
-                refresh(width, height);
-            } else {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
-                log.error(resultDto.getMessage());
+        submitBtn.addActionListener(l -> action(objectJList, keyField, sqlField, width, height));
+
+        keyField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(objectJList, keyField, sqlField, width, height);
+                }
             }
-            keyField.setText(null);
-            sqlField.setText(null);
+        });
+
+        sqlField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(objectJList, keyField, sqlField, width, height);
+                }
+            }
         });
 
         add(viewLabel);
@@ -115,5 +118,33 @@ public class UpdateSQLPanel extends JPanel {
         add(submitBtn);
 
         revalidate();
+    }
+
+    /**
+     * submit action
+     *
+     * @param objectJList   object list
+     * @param keyField      key field
+     * @param sqlField      sql field
+     * @param width         width
+     * @param height        height
+     */
+    private void action(JList<String> objectJList, JTextField keyField, JTextField sqlField, int width, int height) {
+        String text = objectJList.getSelectedValue().split("\\.")[0];
+        String key = keyField.getText();
+        String sql = sqlField.getText();
+        // execute update
+        ResultDto<BasicSql> resultDto = manager.initUpdateBasicSQLView(text, key, sql);
+        if (resultDto.isUpdateResult()) {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
+            log.info(resultDto.getMessage());
+            // clear panel and reset value
+            refresh(width, height);
+        } else {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+            log.error(resultDto.getMessage());
+        }
+        keyField.setText(null);
+        sqlField.setText(null);
     }
 }

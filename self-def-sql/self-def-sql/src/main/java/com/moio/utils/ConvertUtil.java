@@ -15,6 +15,10 @@ import java.util.List;
  */
 public final class ConvertUtil {
 
+    private ConvertUtil() {
+        throw new IllegalStateException("util class can not be init");
+    }
+
     /**
      * convert container add one blank if container with no blank in the middle
      *
@@ -118,14 +122,75 @@ public final class ConvertUtil {
         List<String> list = new ArrayList<>();
 
         if (parameters != null) {
-            String[] splitParameterArr = parameters.split(",");
-            for (String parameter : splitParameterArr) {
-                parameter = convertRules(key, parameter);
-                list.add(parameter);
+            if (parameters.contains(" ")) {
+                if (parameters.contains(",")) {
+                    String all = parameters.replaceAll(" ", "");
+                    String regex = regexInit(key);
+                    String replaceAll = judgeRegex(regex, all, parameters);
+                    String[] split = replaceAll.split(" ");
+                    travelParameters(split, key, list);
+                }
+            } else {
+                // drop all blank symbols
+                String replaceAll = parameters.replaceAll(" ", "");
+                if (replaceAll.contains(",")) {
+                    String[] split = replaceAll.split(",");
+                    travelParameters(split, key, list);
+                }
             }
         }
 
         return list;
+    }
+
+    /**
+     * travel split parameters array.
+     *
+     * @param split     split parameters array
+     * @param key       key
+     * @param list      result list
+     */
+    private static void travelParameters(String[] split, String key, List<String> list) {
+        for (String parameter : split) {
+            parameter = convertRules(key, parameter);
+            list.add(parameter);
+        }
+    }
+
+    /**
+     * init regex.
+     *
+     * @param key key
+     * @return regex
+     */
+    private static String regexInit(String key) {
+        String regex;
+        if ("cntr_n".equals(key)) {
+            regex = "(.{11})";
+        } else {
+            regex = "\\s{1,}";
+        }
+
+        return regex;
+    }
+
+    /**
+     * judge regex.
+     *
+     * @param regex         regex
+     * @param all           new turned parameters
+     * @param parameters    original parameters
+     * @return replace parameters
+     */
+    private static String judgeRegex(String regex, String all, String parameters) {
+        String replaceAll;
+        if (!"\\s{1,}".equals(regex)) {
+            replaceAll = all.replaceAll(regex, "$1 ");
+        } else {
+            replaceAll = parameters.replaceAll(regex, " ");
+        }
+
+        return replaceAll;
     }
 
     /**

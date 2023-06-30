@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 /**
@@ -70,31 +72,42 @@ public class AddSQLPanel extends JPanel {
         JButton submitBtn = new JButton("提交");
         submitBtn.setBounds(215 + keyField.getWidth(), 90 + scrollPane.getHeight(), 65, 20);
         // get name field value
-        submitBtn.addActionListener(l -> {
-            String tableName = nameField.getText();
-            String condition = conditionField.getText();
-            String other = otherField.getText();
-            String key = keyField.getText();
+        submitBtn.addActionListener(l -> action(nameField, conditionField, otherField, keyField, jTextArea, scrollPane));
 
-            ResultDto resultDto = manager.initAddBasicSQLView(tableName, condition, other, key);
-            if (resultDto.isUpdateResult()) {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
-                // clear panel and reset value
-                jTextArea.setText(null);
-                List<BasicSql> search = manager.subShowBasicSQLView();
-                search.forEach(s -> {
-                    jTextArea.append(s.getId() + ". " + s.getSqlValue());
-                    jTextArea.append("\n");
-                });
-            } else {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+        nameField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(nameField, conditionField, otherField, keyField, jTextArea, scrollPane);
+                }
             }
-            nameField.setText(null);
-            conditionField.setText(null);
-            otherField.setText(null);
-            keyField.setText(null);
-            SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+        });
 
+        conditionField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(nameField, conditionField, otherField, keyField, jTextArea, scrollPane);
+                }
+            }
+        });
+
+        otherField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(nameField, conditionField, otherField, keyField, jTextArea, scrollPane);
+                }
+            }
+        });
+
+        keyField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(nameField, conditionField, otherField, keyField, jTextArea, scrollPane);
+                }
+            }
         });
 
         add(viewLabel);
@@ -112,4 +125,32 @@ public class AddSQLPanel extends JPanel {
         revalidate();
         SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
     }
+
+    private void action(JTextField nameField, JTextField conditionField, JTextField otherField, JTextField keyField,
+                        JTextArea jTextArea, JScrollPane scrollPane) {
+        String tableName = nameField.getText();
+        String condition = conditionField.getText();
+        String other = otherField.getText();
+        String key = keyField.getText();
+
+        ResultDto resultDto = manager.initAddBasicSQLView(tableName, condition, other, key);
+        if (resultDto.isUpdateResult()) {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
+            // clear panel and reset value
+            jTextArea.setText(null);
+            List<BasicSql> search = manager.subShowBasicSQLView();
+            search.forEach(s -> {
+                jTextArea.append(s.getId() + ". " + s.getSqlValue());
+                jTextArea.append("\n");
+            });
+        } else {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+        }
+        nameField.setText(null);
+        conditionField.setText(null);
+        otherField.setText(null);
+        keyField.setText(null);
+        SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+    }
+
 }

@@ -13,6 +13,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 import java.util.Objects;
 
@@ -59,44 +61,18 @@ public class AddCategoryPanel extends JPanel {
         nameField.setBounds(145, 40 + scrollPane.getHeight(), 200, 20);
         JButton confirmBtn = new JButton("确认");
         confirmBtn.setBounds(355, 40 + scrollPane.getHeight(), 65, 20);
-        // get name field value
-        confirmBtn.addActionListener(l -> {
-            String text = nameField.getText();
-            try {
-                java.util.List<Category> list = manager.subShowCategoryView();
-                boolean add = manager.initAddCategoryView(list, text);
-                if (add) {
-                    JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_SUCCEED.getContent(), "结果", JOptionPane.PLAIN_MESSAGE);
-                    log.info(SystemWarnLanguageEnum.ADD_SUCCEED.getContent());
-                    // clear panel and reset value
-                    jTextArea.setText(null);
-                    List<Category> search = manager.subShowCategoryView();
-                    search.forEach(c -> {
-                        jTextArea.append(c.getIndexC() + ". " + c.getContent());
-                        jTextArea.append("\n");
-                    });
 
-                } else {
-                    JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent(), "结果", JOptionPane.ERROR_MESSAGE);
-                    log.error(SystemWarnLanguageEnum.ADD_FAILED.getContent());
+        nameField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(nameField, jTextArea, scrollPane);
                 }
-                nameField.setText(null);
-                SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
-            } catch (DuplicateKeyException e) {
-                String[] split = Objects.requireNonNull(e.getRootCause()).getLocalizedMessage().split("SQL statement:");
-                JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent()+ split[ArgsConstant.REMAIN_NUMBER], "结果", JOptionPane.ERROR_MESSAGE);
-                log.info(SystemWarnLanguageEnum.ADD_FAILED.getContent() + split[ArgsConstant.REMAIN_NUMBER]);
-                nameField.setText(null);
-                SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
-            } catch (ContentExistedException e) {
-                JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent()+ e.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
-                log.error(SystemWarnLanguageEnum.ADD_FAILED.getContent() + e.getMessage());
-                nameField.setText(null);
-                SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
             }
-
-
         });
+
+        // get name field value
+        confirmBtn.addActionListener(l -> action(nameField, jTextArea, scrollPane));
 
         add(viewLabel);
         add(scrollPane);
@@ -107,5 +83,48 @@ public class AddCategoryPanel extends JPanel {
         setVisible(true);
         revalidate();
         SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+    }
+
+    /**
+     * confirm event.
+     *
+     * @param nameField     name field
+     * @param jTextArea     text area
+     * @param scrollPane    scroll panel
+     */
+    private void action(JTextField nameField, JTextArea jTextArea, JScrollPane scrollPane) {
+        String text = nameField.getText();
+        try {
+            java.util.List<Category> list = manager.subShowCategoryView();
+            boolean add = manager.initAddCategoryView(list, text);
+            if (add) {
+                JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_SUCCEED.getContent(), "结果", JOptionPane.PLAIN_MESSAGE);
+                log.info(SystemWarnLanguageEnum.ADD_SUCCEED.getContent());
+                // clear panel and reset value
+                jTextArea.setText(null);
+                List<Category> search = manager.subShowCategoryView();
+                search.forEach(c -> {
+                    jTextArea.append(c.getIndexC() + ". " + c.getContent());
+                    jTextArea.append("\n");
+                });
+
+            } else {
+                JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent(), "结果", JOptionPane.ERROR_MESSAGE);
+                log.error(SystemWarnLanguageEnum.ADD_FAILED.getContent());
+            }
+            nameField.setText(null);
+            SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+        } catch (DuplicateKeyException ex) {
+            String[] split = Objects.requireNonNull(ex.getRootCause()).getLocalizedMessage().split("SQL statement:");
+            JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent()+ split[ArgsConstant.REMAIN_NUMBER], "结果", JOptionPane.ERROR_MESSAGE);
+            log.info(SystemWarnLanguageEnum.ADD_FAILED.getContent() + split[ArgsConstant.REMAIN_NUMBER]);
+            nameField.setText(null);
+            SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+        } catch (ContentExistedException ex) {
+            JOptionPane.showMessageDialog(null, SystemWarnLanguageEnum.ADD_FAILED.getContent()+ ex.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+            log.error(SystemWarnLanguageEnum.ADD_FAILED.getContent() + ex.getMessage());
+            nameField.setText(null);
+            SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+        }
     }
 }

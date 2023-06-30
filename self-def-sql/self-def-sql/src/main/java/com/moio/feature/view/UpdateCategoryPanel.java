@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.Optional;
@@ -89,23 +91,24 @@ public class UpdateCategoryPanel extends JPanel {
             }
         });
 
-        submitBtn.addActionListener(l -> {
-            String text = Optional.ofNullable(objectJList.getSelectedValue()).isPresent()?objectJList.getSelectedValue().split("\\.")[0]:"";
-            String index = indexField.getText();
-            String content = contentField.getText();
-            // execute update
-            ResultDto<Category> resultDto = manager.initUpdateCategoryView(text, index, content);
-            if (resultDto.isUpdateResult()) {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
-                log.info(resultDto.getMessage());
-                // clear panel and reset value
-                refresh(width, height);
-            } else {
-                JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
-                log.error(resultDto.getMessage());
+        submitBtn.addActionListener(l -> action(objectJList, indexField, contentField, width, height));
+
+        indexField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(objectJList, indexField, contentField, width, height);
+                }
             }
-            indexField.setText(null);
-            contentField.setText(null);
+        });
+
+        contentField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    action(objectJList, indexField, contentField, width, height);
+                }
+            }
         });
 
         add(viewLabel);
@@ -117,5 +120,33 @@ public class UpdateCategoryPanel extends JPanel {
         add(submitBtn);
 
         revalidate();
+    }
+
+    /**
+     * submit event.
+     *
+     * @param objectJList       object list
+     * @param indexField        index field
+     * @param contentField      content field
+     * @param width             width
+     * @param height            height
+     */
+    private void action(JList<String> objectJList, JTextField indexField, JTextField contentField, int width, int height) {
+        String text = Optional.ofNullable(objectJList.getSelectedValue()).isPresent()?objectJList.getSelectedValue().split("\\.")[0]:"";
+        String index = indexField.getText();
+        String content = contentField.getText();
+        // execute update
+        ResultDto<Category> resultDto = manager.initUpdateCategoryView(text, index, content);
+        if (resultDto.isUpdateResult()) {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.PLAIN_MESSAGE);
+            log.info(resultDto.getMessage());
+            // clear panel and reset value
+            refresh(width, height);
+        } else {
+            JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+            log.error(resultDto.getMessage());
+        }
+        indexField.setText(null);
+        contentField.setText(null);
     }
 }

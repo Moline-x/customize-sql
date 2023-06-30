@@ -16,6 +16,8 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.StringSelection;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -127,6 +129,32 @@ public class ShowViewPanel extends JPanel {
                                     resultArr[Integer.parseInt(submitBtn.getName())] = sqls;
                                     for (String s : resultArr) {
                                         jTextArea.append(s);
+                                    }
+                                }
+                            }
+                        });
+
+                        nameField.addKeyListener(new KeyAdapter() {
+                            @Override
+                            public void keyTyped(KeyEvent e) {
+                                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                                    String value = nameField.getText();
+
+                                    if (map.get(submitBtn.getName()) == null) {
+                                        map.put(submitBtn.getName(), value);
+                                        String sqls = manager.keyListView(key, value, basicSqls);
+                                        resultArr[Integer.parseInt(submitBtn.getName())] = sqls;
+                                        jTextArea.append(sqls);
+                                    } else {
+                                        if (!value.equals(map.get(submitBtn.getName()))) {
+                                            map.put(submitBtn.getName(), value);
+                                            jTextArea.setText(null);
+                                            String sqls = manager.keyListView(key, value, basicSqls);
+                                            resultArr[Integer.parseInt(submitBtn.getName())] = sqls;
+                                            for (String s : resultArr) {
+                                                jTextArea.append(s);
+                                            }
+                                        }
                                     }
                                 }
                             }

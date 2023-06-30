@@ -15,12 +15,13 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.ConcurrentLinkedQueue;
 
 /**
  * @author molinchang
@@ -204,6 +205,7 @@ public class BindSQLForCategoryPanel extends JPanel {
                 JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
                 log.error(resultDto.getMessage());
             } else {
+                checkBoxSelectIdQueue.clear();
                 List<BasicSql> data = resultDto.getData();
                 addablePanel.removeAll();
                 addablePanel.updateUI();
@@ -225,6 +227,14 @@ public class BindSQLForCategoryPanel extends JPanel {
                     indexLabel.setEnabled(false);
                     keyLabel.setEnabled(false);
 
+                    checkBox.addActionListener(ls -> {
+                        if (checkBox.isSelected()) {
+                            checkBoxSelectIdQueue.add(indexLabel.getText());
+                        } else {
+                            checkBoxSelectIdQueue.remove(indexLabel.getText());
+                        }
+                    });
+
                     JPanel rowPanel = new JPanel(new BorderLayout());
                     JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
                     leftPanel.add(checkBox);
@@ -245,6 +255,77 @@ public class BindSQLForCategoryPanel extends JPanel {
 
             }
 
+        });
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    String searchText = searchField.getText();
+                    String categoryIndex = Optional.ofNullable(objectJList.getSelectedValue()).isPresent() ? objectJList.getSelectedValue().split("\\.")[0]:"";
+                    String comBoxKey = Optional.ofNullable(comboBox.getSelectedItem()).orElse("").toString();
+
+                    BindSqlDto bindSqlDto = new BindSqlDto(categoryIndex, "", searchText, comBoxKey);
+
+                    addablePanel.removeAll();
+                    addablePanel.updateUI();
+
+                    ResultDto<java.util.List<BasicSql>> resultDto = manager.initBindSQLForCategory(bindSqlDto);
+                    if (!resultDto.isUpdateResult()) {
+                        JOptionPane.showMessageDialog(null, resultDto.getMessage(), "结果", JOptionPane.ERROR_MESSAGE);
+                        log.error(resultDto.getMessage());
+                    } else {
+                        checkBoxSelectIdQueue.clear();
+                        List<BasicSql> data = resultDto.getData();
+                        addablePanel.removeAll();
+                        addablePanel.updateUI();
+
+                        GridBagConstraints gbc = new GridBagConstraints();
+                        gbc.gridx = 0;
+                        gbc.gridy = 0;
+                        gbc.fill = GridBagConstraints.HORIZONTAL;
+                        gbc.anchor = GridBagConstraints.WEST;
+                        gbc.weightx = 0.2;
+
+                        for (BasicSql basicSql : data) {
+                            JCheckBox checkBox = new JCheckBox();
+                            JLabel indexLabel = new JLabel(basicSql.getId().toString());
+                            JTextArea sqlTextArea = new JTextArea(basicSql.getSqlValue());
+                            JLabel keyLabel = new JLabel(ViewEnum.KEY_SYMBOL_LEFT.getContent()+basicSql.getSqlKey() +"】");
+                            sqlTextArea.setEditable(false);
+                            sqlTextArea.setLineWrap(true);
+                            indexLabel.setEnabled(false);
+                            keyLabel.setEnabled(false);
+
+                            checkBox.addActionListener(ls -> {
+                                if (checkBox.isSelected()) {
+                                    checkBoxSelectIdQueue.add(indexLabel.getText());
+                                } else {
+                                    checkBoxSelectIdQueue.remove(indexLabel.getText());
+                                }
+                            });
+
+                            JPanel rowPanel = new JPanel(new BorderLayout());
+                            JPanel leftPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+                            leftPanel.add(checkBox);
+                            leftPanel.add(indexLabel);
+                            rowPanel.add(leftPanel, BorderLayout.WEST);
+                            JPanel rightPanel = new JPanel(new BorderLayout());
+                            rightPanel.add(sqlTextArea, BorderLayout.CENTER);
+                            rightPanel.add(keyLabel, BorderLayout.EAST);
+                            rowPanel.add(rightPanel, BorderLayout.CENTER);
+
+                            gbc.gridy++;
+                            addablePanel.add(rowPanel, gbc);
+                        }
+
+                        addablePanel.revalidate();
+                        addablePanel.repaint();
+                        SwingUtilities.invokeLater(() -> addableScrollPane.getVerticalScrollBar().setValue(0));
+
+                    }
+                }
+            }
         });
 
         add(viewLabel);

@@ -249,7 +249,6 @@ public class CustomizeSqlNewManager {
         final List<Integer> idList = sortBasicSqlList.stream().map(BasicSql::getId).collect(Collectors.toList());
         sortBasicSqlList.forEach(basicSql -> log.debug("{}. {}", basicSql.getId(), basicSql.getSqlValue()));
 
-        SystemWarnLanguageEnum.BIND_SQL_TO_CATEGORY.output();
 
         // filter sql
         final List<BasicSql> list = basicSqlService.list();

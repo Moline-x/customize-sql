@@ -1,7 +1,6 @@
 package com.moio.feature.view;
 
 import com.formdev.flatlaf.icons.FlatSearchWithHistoryIcon;
-import com.moio.common.constant.GuiConstant;
 import com.moio.common.enums.ViewEnum;
 import com.moio.common.listener.JTextFieldHintListener;
 import com.moio.entity.Category;
@@ -11,6 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import java.util.List;
 
 
@@ -24,8 +25,6 @@ public class ShowAllCategoryPanel extends JPanel {
 
     @Autowired
     CustomizeSqlNewManager manager;
-
-
 
 
     public void refresh(int width, int height) {
@@ -63,6 +62,22 @@ public class ShowAllCategoryPanel extends JPanel {
         searchBtn.setBorderPainted(false);
         searchBtn.setContentAreaFilled(false);
         searchBtn.setToolTipText("检索");
+
+        searchField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyTyped(KeyEvent e) {
+                if (e.getKeyChar() == KeyEvent.VK_ENTER) {
+                    jTextArea.setText(null);
+                    String text = searchField.getText();
+                    List<Category> categoryList = manager.subShowCategoryViewWithSearch(text);
+                    categoryList.forEach(c -> {
+                        jTextArea.append(c.getIndexC() + ". " + c.getContent());
+                        jTextArea.append("\n");
+                    });
+                    SwingUtilities.invokeLater(() -> scrollPane.getVerticalScrollBar().setValue(0));
+                }
+            }
+        });
 
         searchBtn.addActionListener(l -> {
             jTextArea.setText(null);
